@@ -2,16 +2,19 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@opernzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "openzepplin/contracts/token/ERC721/ERC721.sol";
+
+import "hardhat/console.sol";
+
 
 contract NFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     address contractAddress;
 
-    constructor(address marketplaceAddress) ERC721("Provenance's Digital Marketplace", "TDM") {
+    constructor(address marketplaceAddress) ERC721("Provenance Marketplace", "PM") {
         contractAddress = marketplaceAddress;
-
     }
 
     function createToken(string memory tokenURI) public returns (uint) {
@@ -21,11 +24,6 @@ contract NFT is ERC721URIStorage {
         _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, tokenURI);
         setApprovalForAll(contractAddress, true);
-        return newItemId;
-    }
-
-    function _baseURI() internal pure override returns (string memory) {
-        //Get _baseURI for IPFS
-        return "ec2-52-77-213-144.ap-southeast-1.compute.amazonaws.com";
+        return newItemId
     }
 }
