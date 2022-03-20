@@ -47,6 +47,14 @@ contract NFTMarket is ReentrancyGuard {
     uint256 timestamp
   );
 
+  event MarketItemCancelListing(
+      uint indexed itemId,
+      address indexed nftContract,
+      uint256 indexedtokenId,
+      address seller,
+      uint256 timestamp
+  );
+
   function getMarketItem(uint256 marketItemId) public view returns (MarketItem memory) {
     return idToMarketItem[marketItemId];
   }
@@ -111,6 +119,25 @@ contract NFTMarket is ReentrancyGuard {
       msg.sender,
       price,
       priceInSGD,
+      timestamp
+    );
+  }
+
+  function deleteMarketSale(
+    address nftContract,
+    uint256 itemId
+    ) public payable nonReentrant {
+    uint tokenId = idToMarketItem[itemId].tokenId;
+    address seller = idToMarketItem[itemId].seller;
+    uint256 timestamp = block.timestamp;
+
+    IERC721(nftContract).transferFrom(address(this), seller, tokenId);
+
+    emit MarketItemCancelListing(
+      itemId,
+      nftContract,
+      tokenId,
+      seller,
       timestamp
     );
   }
