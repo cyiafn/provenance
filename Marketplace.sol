@@ -20,6 +20,7 @@ contract NFTMarket is ReentrancyGuard {
     address payable seller;
     address payable owner;
     uint256 price;
+    uint256 priceInSGD;
   }
 
   mapping(uint256 => MarketItem) private idToMarketItem;
@@ -30,7 +31,9 @@ contract NFTMarket is ReentrancyGuard {
     uint256 indexed tokenId,
     address seller,
     address owner,
-    uint256 price
+    uint256 price,
+    uint256 priceInSGD,
+    uint256 timestamp
   );
 
   event MarketItemSale (
@@ -39,7 +42,9 @@ contract NFTMarket is ReentrancyGuard {
     uint256 indexed tokenId,
     address seller,
     address buyer,
-    uint256 price
+    uint256 price,
+    uint256 priceInSGD,
+    uint256 timestamp
   );
 
   function getMarketItem(uint256 marketItemId) public view returns (MarketItem memory) {
@@ -49,12 +54,14 @@ contract NFTMarket is ReentrancyGuard {
   function createMarketItem(
     address nftContract,
     uint256 tokenId,
-    uint256 price
+    uint256 price,
+    uint256 priceInSGD
   ) public payable nonReentrant {
     require(price > 0, "Price must be at least 1 wei");
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
+    uint256 timestamp = block.timestamp;
   
     idToMarketItem[itemId] =  MarketItem(
       itemId,
@@ -62,7 +69,8 @@ contract NFTMarket is ReentrancyGuard {
       tokenId,
       payable(msg.sender),
       payable(address(0)),
-      price
+      price,
+      priceInSGD
     );
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
@@ -73,17 +81,21 @@ contract NFTMarket is ReentrancyGuard {
       tokenId,
       msg.sender,
       address(0),
-      price
+      price,
+      priceInSGD,
+      timestamp
     );
   }
 
   function createMarketSale(
     address nftContract,
-    uint256 itemId
+    uint256 itemId,
+    uint256 priceInSGD
     ) public payable nonReentrant {
     uint price = idToMarketItem[itemId].price;
     uint tokenId = idToMarketItem[itemId].tokenId;
     address seller = idToMarketItem[itemId].seller;
+    uint256 timestamp = block.timestamp;
     require(msg.value == price, "Please submit the asking price in order to complete the purchase");
 
     idToMarketItem[itemId].seller.transfer(msg.value);
@@ -97,7 +109,9 @@ contract NFTMarket is ReentrancyGuard {
       tokenId,
       seller,
       msg.sender,
-      price
+      price,
+      priceInSGD,
+      timestamp
     );
   }
 
@@ -146,4 +160,5 @@ contract NFTMarket is ReentrancyGuard {
     }
     return items;
   }
+
 }
